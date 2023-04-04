@@ -88,7 +88,8 @@ if __name__ == '__main__':
         evaluator = model.Evaluator(
             device, net, dataloader, loss_fns, checkpoint_path, args.nmp)
         evaluator.load_best_checkpoint()
-        prefix = '{}_{}'.format(ds, args.subset)
+        #prefix = '{}_{}'.format(ds, args.subset)
+        prefix = 'test_04_04'
         evaluator.save_results(
             prefix=prefix, residual=args.residual, clip=True, loss_names=loss_names, loss_fns=loss_fns)
 
