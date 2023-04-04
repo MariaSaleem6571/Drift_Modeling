@@ -3,9 +3,9 @@
 #SBATCH --time=00:30:00
 #SBATCH --partition=mundus
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=testing_drift_model
-#SBATCH --output=testing_drift_model.out
-#SBATCH --error=testing_drift_model.err
+#SBATCH --job-name=run_all_models_04_04
+#SBATCH --output=run_all_models_04_04.out
+#SBATCH --error=run_all_models_04_04.err
 
-python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 pretrained --channels 5
+python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2016_15 pretrained --channels 5
 
