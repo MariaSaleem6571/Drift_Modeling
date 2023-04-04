@@ -57,7 +57,7 @@ class ProbDistrLoss():
         elif self._error_type == "MSE":
             error = torch.square(pred - true).mean(1)
             
-        error = (1 - self._alpha)*error + self._alpha*torch.abs(1 - pred).sum(1)
+        error = (1 - self._alpha)*error + self._alpha*torch.abs(1 - torch.sum(pred))
         
         if self._batch_mean:
             error = error.mean()
