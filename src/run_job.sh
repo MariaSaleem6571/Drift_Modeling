@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#SBATCH --time=00:10:00
-#SBATCH --partition=gpu
+#SBATCH --time=00:30:00
+#SBATCH --partition=mundus
 #SBATCH --gres=gpu:1
 #SBATCH --job-name=testing_drift_model
 #SBATCH --output=testing_drift_model.out

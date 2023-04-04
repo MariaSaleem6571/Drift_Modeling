@@ -80,7 +80,9 @@ if __name__ == '__main__':
         
         # loss function
         land_mask = ~loader.glazure64_mesh.mask
-        loss_fn = loss.MSE(land_mask, batch_mean=False)
+        loss_fn = [loss.MAE(land_mask, batch_mean=False), loss.MSE(land_mask, batch_mean=False), 
+                   loss.MAEProbDistrLoss(land_mask, batch_mean=False), loss.MSEProbDistrLoss(land_mask, batch_mean=False)]
+        loss_names = ["MAE", "MSE", "MAEwProba", "MSEwProba"]
     
         # evaluate
         evaluator = model.Evaluator(
@@ -88,7 +90,7 @@ if __name__ == '__main__':
         evaluator.load_best_checkpoint()
         prefix = '{}_{}'.format(ds, args.subset)
         evaluator.save_results(
-            prefix=prefix, residual=args.residual, clip=True)
+            prefix=prefix, residual=args.residual, clip=True, loss_names=loss_names)
 
     
     
