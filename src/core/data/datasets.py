@@ -72,7 +72,7 @@ class Snapshot(Dataset):
         
         density_maps = xr.open_dataset(input_density_path).density_map
         return density_maps.isel(
-            ensemble_id=ensemble_index, obs=[obs_index, obs_index+1]).data
+            ensemble_id=ensemble_index, obs=[obs_index, obs_index+2]).data
     
     def unravel_index(self, index):
         if index >= len(self):
