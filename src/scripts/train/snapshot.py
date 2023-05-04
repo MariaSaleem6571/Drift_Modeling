@@ -127,8 +127,8 @@ if __name__ == '__main__':
     
     # loss function
     land_mask = ~loader.glazure64_mesh.mask
-    loss_fn = loss.MAE(land_mask, batch_mean=True)
-    # loss_fn = loss.MAEProbDistrLoss(land_mask, batch_mean=True, alpha=0.4)
+    # loss_fn = loss.MAE(land_mask, batch_mean=True)
+    loss_fn = loss.MAEProbDistrLoss(land_mask, batch_mean=True, alpha=0.4)
     if args.residual:
         loss_fn = loss.ResidualLoss(loss_fn)
 
