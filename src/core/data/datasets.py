@@ -42,7 +42,7 @@ class Snapshot(Dataset):
         input_data = np.concatenate((input_field, input_map[None]))
         
         if self._input_map:
-            return input_data, label_map, input_data[-2]
+            return input_data, label_map, input_data[-1]
         return input_data, label_map
 
     def _load_field_from_index(self, time_index, obs_index):
@@ -56,7 +56,7 @@ class Snapshot(Dataset):
         
         if self._field_interp > 0 or self._next_field:
             input_field_2 = self._load_field_from_index(
-                time_index, obs_index+2)
+                time_index, obs_index+1)
         if self._field_interp > 0:
             input_field = util.misc.interpolated(
                 input_field, input_field_2, self._field_interp)
@@ -72,7 +72,7 @@ class Snapshot(Dataset):
         
         density_maps = xr.open_dataset(input_density_path).density_map
         return density_maps.isel(
-            ensemble_id=ensemble_index, obs=[obs_index, obs_index+2]).data
+            ensemble_id=ensemble_index, obs=[obs_index, obs_index+1]).data
     
     def unravel_index(self, index):
         if index >= len(self):
