@@ -25,6 +25,8 @@ class Snapshot(Dataset):
         index_offsets = np.load(index_offsets_path, allow_pickle=True).item()
         self._time_offsets = index_offsets['time']
         self._ensemble_offsets = index_offsets['ensemble']
+
+        self._no_of_days = 1
         
     def __len__(self):
         return self._time_offsets[-1]
@@ -32,7 +34,6 @@ class Snapshot(Dataset):
     def __getitem__(self, index):
         # fetch 3D index
         time_index, ensemble_index, obs_index = self.unravel_index(index)
-        print(obs_index)
         # fetch input field, input map, and label map
         input_field = self.load_input_field(time_index, obs_index)
         input_map, label_map = self.load_density_map_pair(
@@ -54,10 +55,14 @@ class Snapshot(Dataset):
     
     def load_input_field(self, time_index, obs_index):
         input_field = self._load_field_from_index(time_index, obs_index)
+
+        # SHIFTING THE DAYS
+        if obs_index > (15 - self._no_of_days):
+            obs_index = 15 - self._no_of_days
         
         if self._field_interp > 0 or self._next_field:
             input_field_2 = self._load_field_from_index(
-                time_index, obs_index+1)
+                time_index, obs_index+self._no_of_days)
         if self._field_interp > 0:
             input_field = util.misc.interpolated(
                 input_field, input_field_2, self._field_interp)
@@ -67,13 +72,18 @@ class Snapshot(Dataset):
         return input_field
     
     def load_density_map_pair(self, time_index, ensemble_index, obs_index):
+
+        # SHIFTING THE DAYS
+        if obs_index > (15 - self._no_of_days):
+            obs_index = 15 - self._no_of_days
+
         start_time_index = str(time_index)
         input_density_path = (
             self._density_map_dir / start_time_index).with_suffix('.nc')
         
         density_maps = xr.open_dataset(input_density_path).density_map
         return density_maps.isel(
-            ensemble_id=ensemble_index, obs=[obs_index, obs_index+1]).data
+            ensemble_id=ensemble_index, obs=[obs_index, obs_index+self._no_of_days]).data
     
     def unravel_index(self, index):
         if index >= len(self):
