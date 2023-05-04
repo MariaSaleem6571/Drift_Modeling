@@ -2,6 +2,7 @@
 
 #SBATCH --time=03:00:00
 #SBATCH --partition=mundus
+#SBATCH --gres=gpu:1
 #SBATCH --job-name=DayShift2_pretrained
 #SBATCH --output=DayShift2_pretrained.out
 #SBATCH --error=DayShift2_pretrained.err
