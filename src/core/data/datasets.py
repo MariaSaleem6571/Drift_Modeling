@@ -42,7 +42,7 @@ class Snapshot(Dataset):
         input_data = np.concatenate((input_field, input_map[None]))
         
         if self._input_map:
-            return input_data, label_map, input_data[-1]
+            return input_data, label_map, input_data[-2]
         return input_data, label_map
 
     def _load_field_from_index(self, time_index, obs_index):
