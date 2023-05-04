@@ -32,6 +32,7 @@ class Snapshot(Dataset):
     def __getitem__(self, index):
         # fetch 3D index
         time_index, ensemble_index, obs_index = self.unravel_index(index)
+        print(obs_index)
         # fetch input field, input map, and label map
         input_field = self.load_input_field(time_index, obs_index)
         input_map, label_map = self.load_density_map_pair(
