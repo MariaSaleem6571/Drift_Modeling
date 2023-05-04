@@ -56,7 +56,7 @@ class Snapshot(Dataset):
         
         if self._field_interp > 0 or self._next_field:
             input_field_2 = self._load_field_from_index(
-                time_index, obs_index+1)
+                time_index, obs_index+2)
         if self._field_interp > 0:
             input_field = util.misc.interpolated(
                 input_field, input_field_2, self._field_interp)
