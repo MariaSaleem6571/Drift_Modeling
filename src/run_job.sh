@@ -3,8 +3,8 @@
 #SBATCH --time=03:00:00
 #SBATCH --partition=mundus
 #SBATCH --gres=gpu:1
-#SBATCH --job-name=DayShift2_pretrained
-#SBATCH --output=DayShift2_pretrained.out
-#SBATCH --error=DayShift2_pretrained.err
+#SBATCH --job-name=MAEProb_Training
+#SBATCH --output=MAEProb_Training.out
+#SBATCH --error=MAEProb_Training.err
 
-python -m scripts.eval.snapshot /mundus/aaslam308/DriftModelling daily2016_15 pretrained --channels 5
+python -m scripts.train.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2016_15 MAEProb_Loss --channels 5
