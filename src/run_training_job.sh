@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --time=03:00:00
-#SBATCH --partition=mundus
+#SBATCH --partition=all
 #SBATCH --gres=gpu:8
 #SBATCH --job-name=MAEProb_Training
 #SBATCH --output=MAEProb_Training.out
