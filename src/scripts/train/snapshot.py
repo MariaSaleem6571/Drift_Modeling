@@ -63,6 +63,10 @@ def parse_args():
                         help='do not use mixed precision GPU operations')
     parser.add_argument('--debug', action='store_true',
                         help='run the script in debug mode')
+    parser.add_argument('--loss', type=str, default="MAE",
+                        help='name of loss_fn')
+    parser.add_argument('--lossalpha', type=float, default=0.4,
+                        help='the value of alpha of the loss function')
 
     args = parser.parse_args()
     return args
@@ -125,14 +129,49 @@ if __name__ == '__main__':
     # select GPU if available
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
-    # loss function
+    # loss function (Redefined)
+    OVER_RIDE_RUN_ID = False
+    
     land_mask = ~loader.glazure64_mesh.mask
-    # loss_fn = loss.MAE(land_mask, batch_mean=True)
-    loss_fn = loss.MAEProbDistrLoss(land_mask, batch_mean=True, alpha=0.4)
+    
+    # Mean Absolute Error
+    if args.loss == "MAE":
+        loss_fn = loss.MAE(land_mask, batch_mean=True)
+        
+    # Mean Squared Error
+    elif args.loss == "MSE":
+        loss_fn = loss.MSE(land_mask, batch_mean=True)
+    
+    # Mean Absolute Error with Summing Prob Distribution to 1
+    elif args.loss == "MAEProbDistrLoss":
+        loss_fn = loss.MAEProbDistrLoss(land_mask, batch_mean=True, alpha=args.lossalpha)
+        OVER_RIDE_RUN_ID = True
+    
+    # Mean Squared Error with Summing Prob Distribution to 1
+    elif args.loss == "MSEProbDistrLoss":
+        loss_fn = loss.MSEProbDistrLoss(land_mask, batch_mean=True, alpha=args.lossalpha)
+        OVER_RIDE_RUN_ID = True
+    
+    # Changing the Model Name by Default
+    if OVER_RIDE_RUN_ID:
+        # Change run_id to the combination of the Loss name and the Alpha Value
+        run_id = f"{args.loss}_{args.lossalpha}"
+        
+        # Append "_residual" to loss name if trained with residual
+        if args.residual:
+            run_id = f"{run_id}_residual"
+        
+        # Change the checkpoint Path
+        checkpoint_path = paths.model_dir / run_id
+    
+    # Over-ride Loss Function
+    # loss_fn = loss.MSEProbDistrLoss(land_mask, batch_mean=True, alpha=args.lossalpha)
+    
     if args.residual:
         loss_fn = loss.ResidualLoss(loss_fn)
-
-    # training
+    
+    
+    # Training
     trainer = model.Trainer(
         device, args.seed, args.epochs, train_dataloader, val_dataloader, net,
         loss_fn, optim, checkpoint_path, scheduler_fn, args.nmp, early_stopper)
