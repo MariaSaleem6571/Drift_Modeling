@@ -50,6 +50,8 @@ def parse_args():
                         help='do not use mixed precision GPU operations')
     parser.add_argument('--debug', action='store_true',
                         help='run the script in debug mode')
+    parser.add_argument('--saving_name', type=str, default='model-test',
+                        help='name to save model evaluation result')
 
     args = parser.parse_args()
     return args
@@ -88,10 +90,10 @@ if __name__ == '__main__':
         evaluator = model.Evaluator(
             device, net, dataloader, loss_fns, checkpoint_path, args.nmp)
         evaluator.load_best_checkpoint()
+        
+        # NAme for saving the output of the model evaluation result
         #prefix = '{}_{}'.format(ds, args.subset)
-        prefix = 'test_04_04'
+        prefix = args.saving_name
+        
         evaluator.save_results(
             prefix=prefix, residual=args.residual, clip=True, loss_names=loss_names, loss_fns=loss_fns)
-
-    
-    
