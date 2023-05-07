@@ -26,13 +26,13 @@ class Loader:
         self._paths = path_index
         self.glazure64_mesh = mesh.Glazure64(self._paths.glazure64_mesh_mask)
     
-    def snapshot_dataset(self, field_name, subset=None, **kwargs):
+    def snapshot_dataset(self, field_name, subset=None, no_of_days=1, **kwargs):
         from torch.utils.data import Subset
         from core.data import datasets
         
         field_dir = self._paths.fields_dir / field_name
         dataset = datasets.Snapshot(
-            field_dir, self._paths.density_maps_dir, self._paths.index_offsets,
+            field_dir, self._paths.density_maps_dir, self._paths.index_offsets, no_of_days=no_of_days,
             **kwargs)
         
         if subset is not None:

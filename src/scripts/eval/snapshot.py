@@ -52,6 +52,8 @@ def parse_args():
                         help='run the script in debug mode')
     parser.add_argument('--saving_name', type=str, default='model-test',
                         help='name to save model evaluation result')
+    parser.add_argument('--no_of_days', type=int, default=1,
+                        help='no of days ahead to be predicted')
 
     args = parser.parse_args()
     return args
@@ -61,14 +63,14 @@ if __name__ == '__main__':
     args = parse_args()
     
     for ds in args.dataset:
-        paths = helper.PathIndex(args.directory, ds)  
+        paths = helper.PathIndex(args.directory, ds) 
         loader = helper.Loader(paths)
         checkpoint_path = paths.model_dir / args.runid
         
         # fetch evaluation set and create dataloader
         dataset = loader.snapshot_dataset(
             args.fieldname, subset=args.subset, input_map=args.residual,
-            field_interp=args.interp, next_field=args.one_day_only)
+            field_interp=args.interp, next_field=args.one_day_only, no_of_days=args.no_of_days)
         dataloader = DataLoader(
             dataset, args.batchsize, pin_memory=True, num_workers=args.nw)
         
@@ -96,7 +98,8 @@ if __name__ == '__main__':
         
         # NAme for saving the output of the model evaluation result
         #prefix = '{}_{}'.format(ds, args.subset)
-        prefix = args.saving_name
+        # prefix = args.saving_name
+        prefix = f'{ds}_{args.subset}_{args.no_of_days}'
         
         evaluator.save_results(
             prefix=prefix, residual=args.residual, clip=True, loss_names=loss_names, loss_fns=loss_fns)
