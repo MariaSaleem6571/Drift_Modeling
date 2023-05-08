@@ -7,4 +7,4 @@
 #SBATCH --output=MAEProb_0.2_Training.out
 #SBATCH --error=MAEProb_0.2_Training.err
 
-python -m scripts.train.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MAEProb_Loss --channels 5 --loss MSEProbDistrLoss --lossalpha 0.2
+~/miniconda3/envs/drift/bin/python -m scripts.train.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MAEProb_Loss --channels 5 --loss MSEProbDistrLoss --lossalpha 0.2
