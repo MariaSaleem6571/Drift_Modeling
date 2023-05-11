@@ -7,4 +7,4 @@
 #SBATCH --output=MAEProb_Training.out
 #SBATCH --error=MAEProb_Training.err
 
-python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2016_15 MAEProb_Loss --channels 5
+python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MSEProbDistrLoss_0.2_residual --channels 5 --args.no_of_days 1

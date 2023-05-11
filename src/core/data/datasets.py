@@ -10,7 +10,7 @@ from core import util
 
 class Snapshot(Dataset):
     def __init__(self, field_dir, density_map_dir, index_offsets_path,
-                 input_map=False, field_interp=0, next_field=False):
+                 input_map=False, field_interp=0, next_field=False, no_of_days = 1):
         assert 0 <= field_interp <= 1
         
         self._input_map = input_map
@@ -26,7 +26,7 @@ class Snapshot(Dataset):
         self._time_offsets = index_offsets['time']
         self._ensemble_offsets = index_offsets['ensemble']
 
-        self._no_of_days = 1
+        self._no_of_days = no_of_days
         
     def __len__(self):
         return self._time_offsets[-1]

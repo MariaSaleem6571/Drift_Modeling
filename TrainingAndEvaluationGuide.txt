@@ -1,0 +1,3 @@
+srun --time=10:00:00 --partition=mundus --gres=gpu:2 --pty bash -l 
+
+python -m scripts.train.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MAEProb_Loss --channels 5 --loss MSEProbDistrLoss --lossalpha 0.4
