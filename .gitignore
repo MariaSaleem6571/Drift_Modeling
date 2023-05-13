@@ -1,4 +1,3 @@
 /data
 /old_data
-/trained/pretrained/8.pt
-/trained/pretrained_residual/8.pt
+/trained/*/*.pt
