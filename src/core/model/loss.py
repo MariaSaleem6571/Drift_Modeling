@@ -60,7 +60,7 @@ class MAEProbDistrLoss():
 
 
 class MSEProbDistrLoss():
-    def __init__(self, exclude_mask, batch_mean=False, alpha=0.3):
+    def __init__(self, exclude_mask, batch_mean=False, alpha=0.2):
         self._mask = ~exclude_mask
         self._batch_mean = batch_mean
         self._alpha = alpha
