@@ -19,6 +19,8 @@ class PathIndex:
         
         self.index_offsets = self.groundtruth_dir / 'index_offsets.npy'
         self.glazure64_mesh_mask = self.data_dir / 'glazure64' / 'mesh_mask.nc'
+        
+        self.plotting_dir = root_dir / 'graphs'
 
         
 class Loader:
