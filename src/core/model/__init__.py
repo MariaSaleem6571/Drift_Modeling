@@ -345,4 +345,40 @@ class Evaluator(_Model):
                 if i % _PRINT_STEP == 0:
                     n = self._dataloader.batch_size * i
                     print('{}: {}/{}'.format(loss_names, n, size))
-    
+
+class plotEvaluation(Evaluator):
+    def __init__(self, device, net, dataloader, loss_fn, checkpoint_path,
+                 mixed_precision):
+        super().__init__(device, net, dataloader, loss_fn, checkpoint_path, mixed_precision)
+        
+    def plot_results(self, loss_names='loss', prefix=None, loss_fns=None,
+                     residual=False, clip=True):
+        self._net.eval()
+        
+        indices = iter(self._dataloader.dataset.indices)
+        size = len(self._dataloader.dataset)
+        with torch.no_grad():
+            pred = None
+            for i, (X, y, *args) in enumerate(self._dataloader, start=1):
+                X, y, args = self.send_to_device(X, y, args)
+                
+                with torch.cuda.amp.autocast(enabled=self._mp):
+                    pred = self.predict(X)
+
+                if residual:
+                    pred += X[:, -1]
+                if clip:
+                    pred = pred.clamp(0)
+            
+                losses = []
+                for loss_fn in loss_fns:
+                    losses.append(loss_fn(pred, y, *args))
+                    
+                batch_indices = misc.yield_n(indices, len(X))
+                self._write_sample_losses(
+                    batch_indices, losses, loss_names, i==1, prefix)
+
+                if i % _PRINT_STEP == 0:
+                    n = self._dataloader.batch_size * i
+                    print('{}: {}/{}'.format(loss_names, n, size))
+        
