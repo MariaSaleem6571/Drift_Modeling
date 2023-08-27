@@ -1,0 +1,39 @@
+TRAINING CODES
+
+git checkout Farooq
+
+cd workspace/DriftModelling/src/
+
+srun --time=10:00:00 --partition=mundus --gres=gpu:2 --pty bash -l 
+
+conda activate drift
+
+python -m scripts.train.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MAEProb_Loss --channels 5 --loss MAEProbDistrLoss --lossalpha 0.8
+
+
+
+EVALUATION CODES
+
+git checkout Farooq
+
+cd workspace/DriftModelling/src/
+
+srun --time=02:00:00 --partition=mundus --gres=gpu:2 --pty bash -l 
+
+conda activate drift
+
+python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MSEProbDistrLoss_0.2 --channels 5 --no_of_days 1
+
+
+
+PLOTTING CODES
+
+git checkout Farooq
+
+cd workspace/DriftModelling/src/
+
+srun --time=01:00:00 --partition=mundus --gres=gpu:1 --pty bash -l 
+
+conda activate drift
+
+python -m scripts.eval.snapshot /mundus/folanrewa525/workspace/DriftModelling daily2018_15 MSEProbDistrLoss_0.2 --channels 5 --no_of_days 1 --plotting_result

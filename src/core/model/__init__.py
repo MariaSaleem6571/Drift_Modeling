@@ -1,5 +1,7 @@
+import os
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import torch
 from pathlib import Path
 
@@ -345,4 +347,49 @@ class Evaluator(_Model):
                 if i % _PRINT_STEP == 0:
                     n = self._dataloader.batch_size * i
                     print('{}: {}/{}'.format(loss_names, n, size))
-    
+
+class plotEvaluator(Evaluator):
+    def __init__(self, device, net, dataloader, loss_fn, checkpoint_path,
+                 mixed_precision):
+        super().__init__(device, net, dataloader, loss_fn, checkpoint_path, mixed_precision)
+        
+    def plot_results(self, image_path, residual=False, clip=True, groundtruth_id = 1):
+        self._net.eval()
+        
+        indices = iter(self._dataloader.dataset.indices)
+        size = len(self._dataloader.dataset)
+        with torch.no_grad():
+            pred = None
+            
+            for i, (X, y, *args) in enumerate(self._dataloader, start=1):
+                
+                if i != groundtruth_id:
+                    continue
+                
+                X, y, args = self.send_to_device(X, y, args)
+                
+                with torch.cuda.amp.autocast(enabled=self._mp):
+                    pred = self.predict(X)
+                
+                # if residual:
+                #     pred += X[:, -1]
+                if clip:
+                    pred = pred.clamp(0)
+                    
+                # batch_indices = misc.yield_n(indices, len(X))
+                print(X.shape, X.shape[1])
+                print(y.shape, y.shape[1])
+                print(pred.shape, pred.shape[1])
+                
+                # Plotting Images
+                # plt.imshow(X.cpu().numpy())
+                # plt.savefig(os.path.join(image_path, "X.jpg"))
+                
+                plt.imshow(y.cpu().numpy())
+                plt.savefig(os.path.join(image_path, "y.jpg"))
+                
+                plt.imshow(pred.cpu().numpy())
+                plt.savefig(os.path.join(image_path, "pred.jpg"))
+                
+                if i == groundtruth_id:
+                    break

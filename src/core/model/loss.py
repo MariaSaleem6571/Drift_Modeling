@@ -39,3 +39,39 @@ class ResidualLoss(nn.Module):
     
     def forward(self, pred, true, inp):
         return self._loss_fn(pred, (true-inp))
+    
+
+class MAEProbDistrLoss():
+    def __init__(self, exclude_mask, batch_mean=False, alpha=0.3):
+        self._mask = ~exclude_mask
+        self._batch_mean = batch_mean
+        self._alpha = alpha
+
+    def __call__(self, pred, true,  *args):
+        pred = pred[:, self._mask]
+        true = true[:, self._mask]
+        
+        reg_error = torch.abs(pred - true).mean(1)
+        error = (1 - self._alpha)*reg_error + self._alpha*torch.abs(1 - torch.sum(pred))
+        
+        if self._batch_mean:
+            error = error.mean()
+        return error
+
+
+class MSEProbDistrLoss():
+    def __init__(self, exclude_mask, batch_mean=False, alpha=0.2):
+        self._mask = ~exclude_mask
+        self._batch_mean = batch_mean
+        self._alpha = alpha
+
+    def __call__(self, pred, true,  *args):
+        pred = pred[:, self._mask]
+        true = true[:, self._mask]
+        
+        reg_error = torch.square(pred - true).mean(1)
+        error = (1 - self._alpha) * reg_error + self._alpha * torch.abs(1 - torch.sum(pred))
+        
+        if self._batch_mean:
+            error = error.mean()
+        return error

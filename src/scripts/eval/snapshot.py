@@ -1,5 +1,6 @@
 import argparse
 
+import os
 import torch
 from torch.utils.data import DataLoader
 from torch import nn
@@ -50,6 +51,18 @@ def parse_args():
                         help='do not use mixed precision GPU operations')
     parser.add_argument('--debug', action='store_true',
                         help='run the script in debug mode')
+    
+    # Parsers for Multi-Day Predictions
+    parser.add_argument('--saving_name', type=str, default='model-test',
+                        help='name to save model evaluation result')
+    parser.add_argument('--no_of_days', type=int, default=1,
+                        help='no of days ahead to be predicted')
+    
+    # Parsers for Plotting
+    parser.add_argument('--plotting_result', action='store_true',
+                        help='plot a given result')
+    parser.add_argument('--plot_input_id', type=int, default=1,
+                        help='id of the image to serve as base for prediction')
 
     args = parser.parse_args()
     return args
@@ -59,14 +72,14 @@ if __name__ == '__main__':
     args = parse_args()
     
     for ds in args.dataset:
-        paths = helper.PathIndex(args.directory, ds)  
+        paths = helper.PathIndex(args.directory, ds) 
         loader = helper.Loader(paths)
         checkpoint_path = paths.model_dir / args.runid
         
         # fetch evaluation set and create dataloader
         dataset = loader.snapshot_dataset(
             args.fieldname, subset=args.subset, input_map=args.residual,
-            field_interp=args.interp, next_field=args.one_day_only)
+            field_interp=args.interp, next_field=args.one_day_only, no_of_days=args.no_of_days)
         dataloader = DataLoader(
             dataset, args.batchsize, pin_memory=True, num_workers=args.nw)
         
@@ -78,17 +91,44 @@ if __name__ == '__main__':
         net = model.models.unet(n_channels=args.channels, n_classes=1,
                                 out_modifier=out_modifier)
         
+        # EVALUATION OF ALL DATA WITHOUT PLOTTING
+        
         # loss function
         land_mask = ~loader.glazure64_mesh.mask
-        loss_fn = loss.MSE(land_mask, batch_mean=False)
-    
-        # evaluate
-        evaluator = model.Evaluator(
-            device, net, dataloader, loss_fn, checkpoint_path, args.nmp)
-        evaluator.load_best_checkpoint()
-        prefix = '{}_{}'.format(ds, args.subset)
-        evaluator.save_results(
-            prefix=prefix, residual=args.residual, clip=True)
-
-    
-    
+        loss_fns = [loss.MAE(land_mask, batch_mean=False), loss.MSE(land_mask, batch_mean=False), 
+                loss.MAEProbDistrLoss(land_mask, batch_mean=False), loss.MSEProbDistrLoss(land_mask, batch_mean=False)]
+        loss_names = ["MAE", "MSE", "MAEwProba", "MSEwProba"]
+        
+        if not args.plotting_result:
+            # evaluate
+            evaluator = model.Evaluator(
+                device, net, dataloader, loss_fns, checkpoint_path, args.nmp)
+            try:
+                evaluator.load_best_checkpoint()
+            except:
+                evaluator.load_last_checkpoint()
+            
+            # NAme for saving the output of the model evaluation result
+            #prefix = '{}_{}'.format(ds, args.subset)
+            # prefix = args.saving_name
+            prefix = f'{ds}_{args.subset}_{args.no_of_days}'
+            
+            evaluator.save_results(
+                prefix=prefix, residual=args.residual, clip=True, loss_names=loss_names, loss_fns=loss_fns)
+        
+        # PLOTTING A SPECIFIC INPUT, TRUE OUTPUT AND PREDICTED OUTPUT
+        else:
+            # evaluate
+            evaluator = model.plotEvaluator(
+                device, net, dataloader, loss_fns, checkpoint_path, args.nmp)
+            try:
+                evaluator.load_best_checkpoint()
+            except:
+                evaluator.load_last_checkpoint()
+                
+            plotting_dir = os.path.join(paths.plotting_dir, args.runid)
+            
+            evaluator.plot_results(
+                plotting_dir, clip=True, groundtruth_id = args.plot_input_id)
+                
+            
